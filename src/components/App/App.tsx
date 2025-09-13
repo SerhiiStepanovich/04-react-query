@@ -7,15 +7,19 @@ import MovieModal from "../MovieModal/MovieModal";
 import ReactPaginate from "../ReactPaginate/ReactPaginate";
 import { useMovies } from "../../hooks/useMovies";
 import type { Movie } from "../../types/movie";
-import toast from "react-hot-toast";
 import styles from "./App.module.css";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import toast, { Toaster } from "react-hot-toast";
 
 const App: React.FC = () => {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const { data, isLoading, isError, isFetching } = useMovies(query, page);
+  const { data, isLoading, isError, isFetching, isSuccess } = useMovies(
+    query,
+    page
+  );
 
   const handleSearch = (newQuery: string) => {
     setQuery(newQuery);
@@ -46,11 +50,12 @@ const App: React.FC = () => {
   return (
     <>
       <SearchBar onSubmit={handleSearch} />
+      <Toaster />
 
       {(isLoading || isFetching) && <Loader />}
       {isError && <ErrorMessage />}
 
-      {!isLoading && !isError && movies.length > 0 && (
+      {isSuccess && movies.length > 0 && (
         <>
           <MovieGrid movies={movies} onSelect={handleSelectMovie} />
           {totalPages > 1 && (
@@ -72,6 +77,8 @@ const App: React.FC = () => {
       {selectedMovie && (
         <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
       )}
+
+      <ReactQueryDevtools initialIsOpen={false} />
     </>
   );
 };
